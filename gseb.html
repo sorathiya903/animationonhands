@@ -5,7 +5,7 @@
 <title>GSEB SSC - Check Application</title>
 <style>
   *{box-sizing:border-box}
-  body{font-family:Arial; padding:15px; max-width:650px; margin:auto; background:#eef2f7}
+  body{font-family:Arial; padding:15px; max-width:700px; margin:auto; background:#eef2f7}
   .search-box{background:white; padding:20px; border-radius:12px; box-shadow:0 2px 10px #0001}
   h2{text-align:center; color:#0b3d91; margin:0 0 5px}
   p.sub{text-align:center; color:#666; font-size:13px; margin:0 0 15px}
@@ -16,11 +16,15 @@
   .header{display:flex; justify-content:space-between; align-items:flex-start; gap:15px; border-bottom:2px solid #0b3d91; padding-bottom:12px}
   .header img{width:110px; height:130px; object-fit:cover; border:1px solid #ddd}
   table{width:100%; border-collapse:collapse; margin-top:12px; font-size:15px}
-  td{padding:8px 6px; border-bottom:1px solid #eee; vertical-align:top}
+  td, th{padding:8px 6px; border-bottom:1px solid #eee; vertical-align:top; text-align:left}
   td:first-child{font-weight:bold; color:#333; width:38%}
-  .sign-row{display:flex; justify-content:space-between; margin-top:15px; align-items:flex-end}
-  .sign-row img{max-width:160px; max-height:60px}
-  .barcode{text-align:center; margin-top:10px}
+  h4{margin:18px 0 5px; color:#0b3d91; border-bottom:1px solid #ddd; padding-bottom:5px}
+  .subj-table td:first-child{font-weight:normal; width:auto}
+  .subj-table th{background:#f0f4ff}
+  .sign-row{display:flex; justify-content:space-between; margin-top:20px; align-items:flex-end; gap:15px}
+  .sign-row img{max-width:170px; max-height:70px; display:block}
+  .sign-row small{color:#666}
+  .barcode{text-align:center; margin-top:12px}
   .barcode img{width:220px}
   .error{color:red; text-align:center; margin-top:10px}
   @media print{
@@ -47,7 +51,6 @@
 
 <script>
 function formatDOB(val){
-  // date input gives YYYY-MM-DD -> convert to DD/MM/YYYY for API
   if(!val) return '';
   const [y,m,d] = val.split('-');
   return `${d}/${m}/${y}`;
@@ -55,8 +58,7 @@ function formatDOB(val){
 
 async function search(){
   const appNo = document.getElementById('appNo').value.trim();
-  const dobRaw = document.getElementById('dob').value;
-  const dob = formatDOB(dobRaw);
+  const dob = formatDOB(document.getElementById('dob').value);
   const box = document.getElementById('result');
   const msg = document.getElementById('msg');
   const btn = document.getElementById('btn');
@@ -73,21 +75,49 @@ async function search(){
 
     const res2 = await fetch(`https://registration.gseb.org/api/CheckApplication/GetStudentDetailsForPrint?Id=${id}`, { headers:{'Accept':'application/json'} });
     const data2 = await res2.json();
-    const s = data2?.Result?.StudentDetails?.[0];
+    const R = data2?.Result;
+    const s = R?.StudentDetails?.[0];
     if(!s) throw new Error('Details not found');
 
-    // Debug: see all fields in console to add subjects later
-    console.log('FULL DATA:', data2.Result);
+    // Subjects - sorted by order
+    const subjects = [...(R.CurrentExamDetails || [])].sort((a,b)=>a.SubjectOrderNumber - b.SubjectOrderNumber);
+    const subjRows = subjects.map((sub,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${sub.SubjectName}</td>
+        <td>${sub.SubjectIndexNumber || '-'}</td>
+        <td>${sub.AnsweringLanguage || '-'}</td>
+        <td>${sub.ExamConductBy || '-'}</td>
+      </tr>`).join('');
 
+    // School
+    const school = R.SchoolDetails?.[0] || {};
+    const schoolName = school.SchoolName || school.SchoolNameGujarati || '-';
+    const schoolExtra = [school.SchoolAddress, school.SchoolDistrict, school.SchoolTaluka].filter(Boolean).join(', ');
+
+    // Fees
+    const fees = R.FeesDetails?.[0] || {};
+    const feesHtml = Object.keys(fees).length ? `
+      <h4>Fees Details</h4>
+      <table>
+        ${Object.entries(fees).map(([k,v])=>`<tr><td>${k}</td><td>${v ?? '-'}</td></tr>`).join('')}
+      </table>` : '';
+
+    // Principal
+    const princi = R.PrinciSign?.[0] || {};
+    
     box.innerHTML = `
-      <div class="card" id="printArea">
+      <div class="card">
         <div class="header">
           <div>
             <h3 style="margin:0; color:#0b3d91">SSC Exam Application Form</h3>
             <p style="margin:5px 0; font-size:13px; color:#666">Form No: ${s.FormNumber}<br>Application ID: ${s.StudentPersonalDetailId}<br>Date: ${s.DateOfFillingForm}</p>
+            <p style="margin:8px 0 0; font-size:14px"><b>School:</b> ${schoolName}<br><span style="font-size:12px; color:#666">${schoolExtra}</span></p>
           </div>
           ${s.ImagePreviewUrl ? `<img src="${s.ImagePreviewUrl}" onerror="this.style.display='none'">` : ''}
         </div>
+
+        <h4>Student Details</h4>
         <table>
           <tr><td>Student Name</td><td>${s.Surname} ${s.StudentName} ${s.GuardianName}</td></tr>
           <tr><td>Category</td><td>${s.CategoryName} - ${s.Caste || '-'}</td></tr>
@@ -98,13 +128,23 @@ async function search(){
           <tr><td>District / Taluka</td><td>${s.DistrictId} / ${s.TalukaId}</td></tr>
           <tr><td>Address</td><td>${s.Address || '-'} - ${s.Pincode || ''}</td></tr>
           <tr><td>GR No</td><td>${s.GRNumber}</td></tr>
-          <tr><td>Total Subjects</td><td>${s.NumberOfTotalSubjectChosen}</td></tr>
           <tr><td>Principal Approve</td><td>${s.PrincipalAprove ? 'Yes' : 'Pending'}</td></tr>
         </table>
+
+        <h4>Subjects (${subjects.length})</h4>
+        <table class="subj-table">
+          <tr><th>#</th><th>Subject Name</th><th>Code</th><th>Answering Lang</th><th>Conduct By</th></tr>
+          ${subjRows || '<tr><td colspan="5">No subjects found</td></tr>'}
+        </table>
+
+        ${feesHtml}
+
+        <h4>Signatures</h4>
         <div class="sign-row">
-          <div>Signature<br>${s.SignaturePreviewUrl ? `<img src="${s.SignaturePreviewUrl}">` : '-'}</div>
-          <div style="text-align:right">Student Photo Verified</div>
+          <div><small>Student Signature</small><br>${s.SignaturePreviewUrl ? `<img src="${s.SignaturePreviewUrl}" onerror="this.parentElement.innerHTML='-'">` : '-'}</div>
+          <div style="text-align:center"><small>Principal</small><br><b>${princi.principallname || ''}</b><br>${princi.principalsignature ? `<img src="${princi.principalsignature}" style="margin:auto">` : '-'}</div>
         </div>
+
         <div class="barcode">${s.Barcode_data ? `<img src="${s.Barcode_data}">` : ''}</div>
         <button class="no-print" onclick="window.print()" style="margin-top:15px">Print / Save PDF</button>
       </div>`;
