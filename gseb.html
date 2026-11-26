@@ -1,60 +1,123 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GSEB SSC - Check Application</title>
+<title>GSEB SSC - Check Application | By Aditya Sorathiya</title>
 <style>
   *{box-sizing:border-box}
-  body{font-family:Arial; padding:15px; max-width:700px; margin:auto; background:#eef2f7}
-  .search-box{background:white; padding:20px; border-radius:12px; box-shadow:0 2px 10px #0001}
-  h2{text-align:center; color:#0b3d91; margin:0 0 5px}
+  body{font-family:Arial; padding:15px; max-width:720px; margin:auto; background:#eef2f7; padding-bottom:40px}
+  .topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px}
+  .topbar button{width:auto; padding:8px 14px; font-size:13px; background:#fff; color:#0b5ed7; border:1px solid #0b5ed7}
+  .search-box{background:white; padding:20px; border-radius:14px; box-shadow:0 2px 12px #0001}
+  h2{text-align:center; color:#0b3d91; margin:0 0 4px}
   p.sub{text-align:center; color:#666; font-size:13px; margin:0 0 15px}
-  input{width:100%; padding:12px; margin:6px 0 12px; font-size:16px; border-radius:8px; border:1px solid #ccc}
-  button{width:100%; padding:13px; font-size:16px; border-radius:8px; border:none; background:#0b5ed7; color:white; cursor:pointer}
-  button:disabled{opacity:0.6}
-  .card{background:white; padding:20px; border-radius:12px; margin-top:15px; box-shadow:0 2px 10px #0001}
-  .header{display:flex; justify-content:space-between; align-items:flex-start; gap:15px; border-bottom:2px solid #0b3d91; padding-bottom:12px}
-  .header img{width:110px; height:130px; object-fit:cover; border:1px solid #ddd}
-  table{width:100%; border-collapse:collapse; margin-top:12px; font-size:15px}
-  td, th{padding:8px 6px; border-bottom:1px solid #eee; vertical-align:top; text-align:left}
+  label{font-size:14px; font-weight:bold}
+  input{width:100%; padding:13px; margin:6px 0 12px; font-size:16px; border-radius:9px; border:1px solid #ccc; text-transform:uppercase}
+  .btn-main{width:100%; padding:14px; font-size:16px; border-radius:9px; border:none; background:#0b5ed7; color:white; cursor:pointer; font-weight:bold}
+  .btn-main:disabled{opacity:.6}
+  .row{display:flex; gap:10px}
+  .row button{flex:1; padding:11px; border-radius:9px; cursor:pointer; font-size:14px; border:1px solid #ddd; background:#f8f9fa}
+  .row button.primary{background:#eef4ff; border-color:#0b5ed7; color:#0b5ed7; font-weight:bold}
+  .card{background:white; padding:20px; border-radius:14px; margin-top:15px; box-shadow:0 2px 12px #0001}
+  .header{display:flex; justify-content:space-between; gap:15px; border-bottom:2px solid #0b3d91; padding-bottom:12px}
+  .header img{width:110px; height:130px; object-fit:cover; border:1px solid #ddd; border-radius:6px}
+  table{width:100%; border-collapse:collapse; margin-top:10px; font-size:15px}
+  td,th{padding:8px 6px; border-bottom:1px solid #eee; vertical-align:top; text-align:left}
   td:first-child{font-weight:bold; color:#333; width:38%}
   h4{margin:18px 0 5px; color:#0b3d91; border-bottom:1px solid #ddd; padding-bottom:5px}
   .subj-table td:first-child{font-weight:normal; width:auto}
   .subj-table th{background:#f0f4ff}
-  .sign-row{display:flex; justify-content:space-between; margin-top:20px; align-items:flex-end; gap:15px}
+  .sign-row{display:flex; justify-content:space-between; margin-top:20px; gap:15px; align-items:flex-end}
   .sign-row img{max-width:170px; max-height:70px; display:block}
-  .sign-row small{color:#666}
   .barcode{text-align:center; margin-top:12px}
   .barcode img{width:220px}
-  .error{color:red; text-align:center; margin-top:10px}
-  @media print{
-    body{background:white; padding:0}
-    .search-box, .no-print{display:none !important}
-    .card{box-shadow:none; margin:0; padding:0}
-  }
+  .error{color:#d00; text-align:center; margin-top:10px; font-weight:bold}
+  .success{color:#0a7a2e; text-align:center; margin-top:10px}
+  .actions{display:flex; gap:10px; margin-top:15px}
+  .actions button{flex:1; padding:12px; border-radius:9px; cursor:pointer; font-size:14px; border:none}
+  .actions .print{background:#0b5ed7; color:#fff}
+  .actions .copy{background:#e9ecef}
+  .actions .wa{background:#25D366; color:#fff}
+  footer{margin-top:25px; text-align:center; font-size:13px; color:#555; background:#fff; padding:16px; border-radius:12px; line-height:1.6}
+  footer b{color:#0b3d91}
+  .disclaimer{font-size:12px; color:#777; background:#fff8e1; border:1px solid #ffe082; padding:10px; border-radius:9px; margin-top:12px; text-align:center}
+  .loader{border:3px solid #eee; border-top:3px solid #0b5ed7; border-radius:50%; width:26px; height:26px; animation:spin 0.8s linear infinite; margin:10px auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media print{ body{background:#fff; padding:0} .search-box, .no-print, footer, .topbar{display:none !important} .card{box-shadow:none; margin:0} }
 </style>
 </head>
 <body>
 
-<div class="search-box">
-  <h2>GSEB SSC Exam Form</h2>
+<div class="topbar no-print">
+  <span>📘 <b>GSEB SSC</b></span>
+  <button onclick="toggleLang()">ગુજરાતી / English</button>
+</div>
+
+<div class="search-box no-print">
+  <h2 id="title">GSEB SSC Exam Form</h2>
   <p class="sub">Gujarat Secondary and Higher Secondary Education Board</p>
-  <label>Application No / Form No</label>
-  <input id="appNo" placeholder="SS/RG/65/0374/04/27/000052" />
-  <label>Date of Birth</label>
+
+  <label id="lblApp">Application No / Form No</label>
+  <input id="appNo" placeholder="SS/RG/00/0000/00/00/000000" autocomplete="off" />
+
+  <label id="lblDob">Date of Birth</label>
   <input id="dob" type="date" />
-  <button id="btn" onclick="search()">Get Details</button>
+
+  <button id="btn" class="btn-main" onclick="search()">🔍 Get Details</button>
   <div id="msg"></div>
+
+  <div class="row" style="margin-top:12px">
+    
+   <button onclick="clearAll()">Clear</button>
+    <button class="primary" onclick="pasteAppNo()">📋 Paste No.</button>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <b>Disclaimer:</b> This website does not track users and does not store any user data. All details are fetched directly from the official GSEB server and are shown only on your device. Nothing is saved.
+  </div>
 </div>
 
 <div id="result"></div>
 
+<footer class="no-print">
+  Made by <b>Aditya Sorathiya</b><br>
+  If any problem, email at <a href="mailto:adityasorathiya.4112@gmail.com">adityasorathiya.4112@gmail.com</a><br>
+  <span style="font-size:12px; color:#888">This is not an official GSEB website. For official work, visit registration.gseb.org</span>
+</footer>
+
 <script>
-function formatDOB(val){
-  if(!val) return '';
-  const [y,m,d] = val.split('-');
-  return `${d}/${m}/${y}`;
+let isGuj = false;
+let lastData = null;
+
+function toggleLang(){
+  isGuj = !isGuj;
+  document.getElementById('title').innerText = isGuj ? 'GSEB SSC પરીક્ષા ફોર્મ' : 'GSEB SSC Exam Form';
+  document.getElementById('lblApp').innerText = isGuj ? 'અરજી નંબર / ફોર્મ નંબર' : 'Application No / Form No';
+  document.getElementById('lblDob').innerText = isGuj ? 'જન્મ તારીખ' : 'Date of Birth';
+  document.getElementById('btn').innerText = isGuj ? '🔍 વિગત મેળવો' : '🔍 Get Details';
 }
+
+
+function clearAll(){
+  document.getElementById('appNo').value = '';
+  document.getElementById('dob').value = '';
+  document.getElementById('result').innerHTML = '';
+  document.getElementById('msg').innerHTML = '';
+  lastData = null;
+}
+async function pasteAppNo(){
+  try{
+    const t = await navigator.clipboard.readText();
+    if(t) document.getElementById('appNo').value = t.trim().toUpperCase();
+  }catch(e){ alert('Please paste manually (Ctrl+V)'); }
+}
+
+// Auto uppercase + auto format SS/RG/...
+document.getElementById('appNo').addEventListener('input', e=>{
+  e.target.value = e.target.value.toUpperCase();
+});
+
+function formatDOB(v){ if(!v) return ''; const [y,m,d]=v.split('-'); return `${d}/${m}/${y}`; }
 
 async function search(){
   const appNo = document.getElementById('appNo').value.trim();
@@ -62,10 +125,11 @@ async function search(){
   const box = document.getElementById('result');
   const msg = document.getElementById('msg');
   const btn = document.getElementById('btn');
-  if(!appNo || !dob){ msg.innerHTML = '<p class="error">Enter Application No and DOB</p>'; return; }
+  if(!appNo || !dob){ msg.innerHTML = '<p class="error">Please enter Application No and DOB</p>'; return; }
+  if(!appNo.includes('/')){ msg.innerHTML = '<p class="error">Application No looks wrong. Example: SS/RG/65/0374/04/27/000052</p>'; return; }
 
   btn.disabled = true; btn.innerText = 'Loading...';
-  msg.innerHTML = ''; box.innerHTML = '';
+  msg.innerHTML = '<div class="loader"></div>'; box.innerHTML = '';
 
   try{
     const res1 = await fetch(`https://registration.gseb.org/api/CheckApplication/CheckApplication?ApplicationNo=${encodeURIComponent(appNo)}&DOB=${encodeURIComponent(dob)}`, { headers:{'Accept':'application/json'} });
@@ -78,81 +142,70 @@ async function search(){
     const R = data2?.Result;
     const s = R?.StudentDetails?.[0];
     if(!s) throw new Error('Details not found');
+    lastData = s;
 
-    // Subjects - sorted by order
-    const subjects = [...(R.CurrentExamDetails || [])].sort((a,b)=>a.SubjectOrderNumber - b.SubjectOrderNumber);
-    const subjRows = subjects.map((sub,i)=>`
-      <tr>
-        <td>${i+1}</td>
-        <td>${sub.SubjectName}</td>
-        <td>${sub.SubjectIndexNumber || '-'}</td>
-        <td>${sub.AnsweringLanguage || '-'}</td>
-        <td>${sub.ExamConductBy || '-'}</td>
-      </tr>`).join('');
-
-    // School
+    const subjects = [...(R.CurrentExamDetails || [])].sort((a,b)=>a.SubjectOrderNumber-b.SubjectOrderNumber);
+    const subjRows = subjects.map((sub,i)=>`<tr><td>${i+1}</td><td>${sub.SubjectName}</td><td>${sub.SubjectIndexNumber||'-'}</td><td>${sub.AnsweringLanguage||'-'}</td><td>${sub.ExamConductBy||'-'}</td></tr>`).join('');
     const school = R.SchoolDetails?.[0] || {};
-    const schoolName = school.SchoolName || school.SchoolNameGujarati || '-';
-    const schoolExtra = [school.SchoolAddress, school.SchoolDistrict, school.SchoolTaluka].filter(Boolean).join(', ');
-
-    // Fees
     const fees = R.FeesDetails?.[0] || {};
-    const feesHtml = Object.keys(fees).length ? `
-      <h4>Fees Details</h4>
-      <table>
-        ${Object.entries(fees).map(([k,v])=>`<tr><td>${k}</td><td>${v ?? '-'}</td></tr>`).join('')}
-      </table>` : '';
-
-    // Principal
     const princi = R.PrinciSign?.[0] || {};
-    
+    const feesHtml = Object.keys(fees).length ? `<h4>Fees Details</h4><table>${Object.entries(fees).map(([k,v])=>`<tr><td>${k}</td><td>${v??'-'}</td></tr>`).join('')}</table>` : '';
+
+    msg.innerHTML = '<p class="success">✅ Details Found!</p>';
     box.innerHTML = `
       <div class="card">
         <div class="header">
           <div>
-            <h3 style="margin:0; color:#0b3d91">SSC Exam Application Form</h3>
-            <p style="margin:5px 0; font-size:13px; color:#666">Form No: ${s.FormNumber}<br>Application ID: ${s.StudentPersonalDetailId}<br>Date: ${s.DateOfFillingForm}</p>
-            <p style="margin:8px 0 0; font-size:14px"><b>School:</b> ${schoolName}<br><span style="font-size:12px; color:#666">${schoolExtra}</span></p>
+            <h3 style="margin:0;color:#0b3d91">SSC Exam Application Form</h3>
+            <p style="margin:5px 0;font-size:13px;color:#666">Form No: ${s.FormNumber}<br>Application ID: ${s.StudentPersonalDetailId}<br>Date: ${s.DateOfFillingForm}</p>
+            <p style="margin:8px 0 0;font-size:14px"><b>School:</b> ${school.SchoolName||'-'}<br><span style="font-size:12px;color:#666">${[school.SchoolAddress,school.SchoolDistrict,school.SchoolTaluka].filter(Boolean).join(', ')}</span></p>
           </div>
           ${s.ImagePreviewUrl ? `<img src="${s.ImagePreviewUrl}" onerror="this.style.display='none'">` : ''}
         </div>
-
         <h4>Student Details</h4>
         <table>
           <tr><td>Student Name</td><td>${s.Surname} ${s.StudentName} ${s.GuardianName}</td></tr>
-          <tr><td>Category</td><td>${s.CategoryName} - ${s.Caste || '-'}</td></tr>
+          <tr><td>Category</td><td>${s.CategoryName} - ${s.Caste||'-'}</td></tr>
           <tr><td>Gender</td><td>${s.Gender}</td></tr>
           <tr><td>Date of Birth</td><td>${s.DateOfBirth}</td></tr>
           <tr><td>Medium</td><td>${s.Medium}</td></tr>
           <tr><td>School Index</td><td>${s.SchoolIndexNumber}</td></tr>
           <tr><td>District / Taluka</td><td>${s.DistrictId} / ${s.TalukaId}</td></tr>
-          <tr><td>Address</td><td>${s.Address || '-'} - ${s.Pincode || ''}</td></tr>
+          <tr><td>Address</td><td>${s.Address||'-'} - ${s.Pincode||''}</td></tr>
           <tr><td>GR No</td><td>${s.GRNumber}</td></tr>
-          <tr><td>Principal Approve</td><td>${s.PrincipalAprove ? 'Yes' : 'Pending'}</td></tr>
+          <tr><td>Principal Approve</td><td>${s.PrincipalAprove?'Yes':'Pending'}</td></tr>
         </table>
-
         <h4>Subjects (${subjects.length})</h4>
-        <table class="subj-table">
-          <tr><th>#</th><th>Subject Name</th><th>Code</th><th>Answering Lang</th><th>Conduct By</th></tr>
-          ${subjRows || '<tr><td colspan="5">No subjects found</td></tr>'}
-        </table>
-
+        <table class="subj-table"><tr><th>#</th><th>Subject</th><th>Code</th><th>Lang</th><th>By</th></tr>${subjRows}</table>
         ${feesHtml}
-
         <h4>Signatures</h4>
         <div class="sign-row">
-          <div><small>Student Signature</small><br>${s.SignaturePreviewUrl ? `<img src="${s.SignaturePreviewUrl}" onerror="this.parentElement.innerHTML='-'">` : '-'}</div>
-          <div style="text-align:center"><small>Principal</small><br><b>${princi.principallname || ''}</b><br>${princi.principalsignature ? `<img src="${princi.principalsignature}" style="margin:auto">` : '-'}</div>
+          <div><small>Student Signature</small><br>${s.SignaturePreviewUrl?`<img src="${s.SignaturePreviewUrl}">`:'-'}</div>
+          <div style="text-align:center"><small>Principal</small><br><b>${princi.principallname||''}</b><br>${princi.principalsignature?`<img src="${princi.principalsignature}" style="margin:auto">`:'-'}</div>
         </div>
-
-        <div class="barcode">${s.Barcode_data ? `<img src="${s.Barcode_data}">` : ''}</div>
-        <button class="no-print" onclick="window.print()" style="margin-top:15px">Print / Save PDF</button>
+        <div class="barcode">${s.Barcode_data?`<img src="${s.Barcode_data}">`:''}</div>
+        <div class="actions no-print">
+          <button class="print" onclick="window.print()">🖨️ Print / PDF</button>
+          <button class="copy" onclick="copyDetails()">📋 Copy</button>
+          <button class="wa" onclick="shareWA()">WhatsApp</button>
+        </div>
       </div>`;
-  }catch(e){
-    msg.innerHTML = `<p class="error">${e.message}</p>`;
-  } finally {
-    btn.disabled = false; btn.innerText = 'Get Details';
-  }
+    box.scrollIntoView({behavior:'smooth'});
+  }catch(e){ msg.innerHTML = `<p class="error">${e.message}</p>`; }
+  finally{ btn.disabled=false; btn.innerText = isGuj ? '🔍 વિગત મેળવો' : '🔍 Get Details'; }
+}
+
+function copyDetails(){
+  if(!lastData) return;
+  const s = lastData;
+  const txt = `GSEB SSC Form\nName: ${s.Surname} ${s.StudentName} ${s.GuardianName}\nForm No: ${s.FormNumber}\nSchool Index: ${s.SchoolIndexNumber}\nMedium: ${s.Medium}\nDOB: ${s.DateOfBirth}`;
+  navigator.clipboard.writeText(txt).then(()=>alert('Copied!'));
+}
+function shareWA(){
+  if(!lastData) return;
+  const s = lastData;
+  const txt = encodeURIComponent(`GSEB SSC Form - ${s.Surname} ${s.StudentName} - Form No: ${s.FormNumber} - School: ${s.SchoolIndexNumber}`);
+  window.open(`https://wa.me/?text=${txt}`, '_blank');
 }
 </script>
 </body>
