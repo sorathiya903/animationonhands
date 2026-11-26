@@ -2,75 +2,116 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GSEB SSC Form Details</title>
+<title>GSEB SSC - Check Application</title>
 <style>
-  body{font-family:Arial; padding:20px; max-width:500px; margin:auto; background:#f5f5f5}
-  input,button{width:100%; padding:12px; margin:8px 0; font-size:16px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box}
-  button{background:#0b5ed7; color:white; border:none; cursor:pointer}
-  .card{background:white; padding:16px; border-radius:10px; margin-top:15px}
-  img{width:120px; border:1px solid #ddd}
-  label{font-size:14px; font-weight:bold}
+  *{box-sizing:border-box}
+  body{font-family:Arial; padding:15px; max-width:650px; margin:auto; background:#eef2f7}
+  .search-box{background:white; padding:20px; border-radius:12px; box-shadow:0 2px 10px #0001}
+  h2{text-align:center; color:#0b3d91; margin:0 0 5px}
+  p.sub{text-align:center; color:#666; font-size:13px; margin:0 0 15px}
+  input{width:100%; padding:12px; margin:6px 0 12px; font-size:16px; border-radius:8px; border:1px solid #ccc}
+  button{width:100%; padding:13px; font-size:16px; border-radius:8px; border:none; background:#0b5ed7; color:white; cursor:pointer}
+  button:disabled{opacity:0.6}
+  .card{background:white; padding:20px; border-radius:12px; margin-top:15px; box-shadow:0 2px 10px #0001}
+  .header{display:flex; justify-content:space-between; align-items:flex-start; gap:15px; border-bottom:2px solid #0b3d91; padding-bottom:12px}
+  .header img{width:110px; height:130px; object-fit:cover; border:1px solid #ddd}
+  table{width:100%; border-collapse:collapse; margin-top:12px; font-size:15px}
+  td{padding:8px 6px; border-bottom:1px solid #eee; vertical-align:top}
+  td:first-child{font-weight:bold; color:#333; width:38%}
+  .sign-row{display:flex; justify-content:space-between; margin-top:15px; align-items:flex-end}
+  .sign-row img{max-width:160px; max-height:60px}
+  .barcode{text-align:center; margin-top:10px}
+  .barcode img{width:220px}
+  .error{color:red; text-align:center; margin-top:10px}
+  @media print{
+    body{background:white; padding:0}
+    .search-box, .no-print{display:none !important}
+    .card{box-shadow:none; margin:0; padding:0}
+  }
 </style>
 </head>
 <body>
-  <h2>GSEB SSC Form Details</h2>
-  
+
+<div class="search-box">
+  <h2>GSEB SSC Exam Form</h2>
+  <p class="sub">Gujarat Secondary and Higher Secondary Education Board</p>
   <label>Application No / Form No</label>
   <input id="appNo" placeholder="SS/RG/65/0374/04/27/000052" />
-  
-  <label>Date of Birth (DD/MM/YYYY)</label>
-  <input id="dob" placeholder="03/05/2011" />
-  
-  <button onclick="search()">Get Details</button>
-  <div id="result"></div>
+  <label>Date of Birth</label>
+  <input id="dob" type="date" />
+  <button id="btn" onclick="search()">Get Details</button>
+  <div id="msg"></div>
+</div>
+
+<div id="result"></div>
 
 <script>
+function formatDOB(val){
+  // date input gives YYYY-MM-DD -> convert to DD/MM/YYYY for API
+  if(!val) return '';
+  const [y,m,d] = val.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 async function search(){
   const appNo = document.getElementById('appNo').value.trim();
-  const dob = document.getElementById('dob').value.trim();
+  const dobRaw = document.getElementById('dob').value;
+  const dob = formatDOB(dobRaw);
   const box = document.getElementById('result');
-  if(!appNo || !dob){ box.innerHTML = 'Enter Application No and DOB'; return; }
-  box.innerHTML = 'Loading...';
+  const msg = document.getElementById('msg');
+  const btn = document.getElementById('btn');
+  if(!appNo || !dob){ msg.innerHTML = '<p class="error">Enter Application No and DOB</p>'; return; }
+
+  btn.disabled = true; btn.innerText = 'Loading...';
+  msg.innerHTML = ''; box.innerHTML = '';
 
   try{
-    // STEP 1: Get ID from ApplicationNo + DOB
-    const step1Url = `https://registration.gseb.org/api/CheckApplication/CheckApplication?ApplicationNo=${encodeURIComponent(appNo)}&DOB=${encodeURIComponent(dob)}`;
-    const res1 = await fetch(step1Url, { headers: { 'Accept': 'application/json' } });
+    const res1 = await fetch(`https://registration.gseb.org/api/CheckApplication/CheckApplication?ApplicationNo=${encodeURIComponent(appNo)}&DOB=${encodeURIComponent(dob)}`, { headers:{'Accept':'application/json'} });
     const data1 = await res1.json();
-    
     const id = data1?.Result?.[0]?.StudentExamFormDetailId;
-    if(!id){ box.innerHTML = 'No record found. Check Application No and DOB.'; return; }
+    if(!id) throw new Error('No record found. Check Application No and DOB.');
 
-    // STEP 2: Get Full Details using ID
-    const res2 = await fetch(`https://registration.gseb.org/api/CheckApplication/GetStudentDetailsForPrint?Id=${id}`, {
-      headers: { 'Accept': 'application/json' }
-    });
+    const res2 = await fetch(`https://registration.gseb.org/api/CheckApplication/GetStudentDetailsForPrint?Id=${id}`, { headers:{'Accept':'application/json'} });
     const data2 = await res2.json();
     const s = data2?.Result?.StudentDetails?.[0];
-    if(!s){ box.innerHTML = 'Details not found'; return; }
+    if(!s) throw new Error('Details not found');
+
+    // Debug: see all fields in console to add subjects later
+    console.log('FULL DATA:', data2.Result);
 
     box.innerHTML = `
-      <div class="card">
-        <img src="${s.ImagePreviewUrl}" />
-        <p><b>Name:</b> ${s.Surname} ${s.StudentName} ${s.GuardianName}</p>
-        <p><b>Form No:</b> ${s.FormNumber}</p>
-        <p><b>Application ID:</b> ${s.StudentPersonalDetailId}</p>
-        <p><b>Category:</b> ${s.CategoryName}</p>
-        <p><b>Gender:</b> ${s.Gender}</p>
-        <p><b>DOB:</b> ${s.DateOfBirth}</p>
-        <p><b>Medium:</b> ${s.Medium}</p>
-        <p><b>School Index:</b> ${s.SchoolIndexNumber}</p>
-        <p><b>District:</b> ${s.DistrictId}</p>
-        <p><b>Taluka:</b> ${s.TalukaId}</p>
-        <p><b>GR No:</b> ${s.GRNumber}</p>
-        <p><b>Total Subjects:</b> ${s.NumberOfTotalSubjectChosen}</p>
-        <p><b>Form Date:</b> ${s.DateOfFillingForm}</p>
-        <p><b>Signature:</b><br><img src="${s.SignaturePreviewUrl}" style="width:150px" /></p>
-        <p><b>Barcode:</b><br><img src="${s.Barcode_data}" style="width:200px" /></p>
-        <button onclick="window.print()">Print</button>
+      <div class="card" id="printArea">
+        <div class="header">
+          <div>
+            <h3 style="margin:0; color:#0b3d91">SSC Exam Application Form</h3>
+            <p style="margin:5px 0; font-size:13px; color:#666">Form No: ${s.FormNumber}<br>Application ID: ${s.StudentPersonalDetailId}<br>Date: ${s.DateOfFillingForm}</p>
+          </div>
+          ${s.ImagePreviewUrl ? `<img src="${s.ImagePreviewUrl}" onerror="this.style.display='none'">` : ''}
+        </div>
+        <table>
+          <tr><td>Student Name</td><td>${s.Surname} ${s.StudentName} ${s.GuardianName}</td></tr>
+          <tr><td>Category</td><td>${s.CategoryName} - ${s.Caste || '-'}</td></tr>
+          <tr><td>Gender</td><td>${s.Gender}</td></tr>
+          <tr><td>Date of Birth</td><td>${s.DateOfBirth}</td></tr>
+          <tr><td>Medium</td><td>${s.Medium}</td></tr>
+          <tr><td>School Index</td><td>${s.SchoolIndexNumber}</td></tr>
+          <tr><td>District / Taluka</td><td>${s.DistrictId} / ${s.TalukaId}</td></tr>
+          <tr><td>Address</td><td>${s.Address || '-'} - ${s.Pincode || ''}</td></tr>
+          <tr><td>GR No</td><td>${s.GRNumber}</td></tr>
+          <tr><td>Total Subjects</td><td>${s.NumberOfTotalSubjectChosen}</td></tr>
+          <tr><td>Principal Approve</td><td>${s.PrincipalAprove ? 'Yes' : 'Pending'}</td></tr>
+        </table>
+        <div class="sign-row">
+          <div>Signature<br>${s.SignaturePreviewUrl ? `<img src="${s.SignaturePreviewUrl}">` : '-'}</div>
+          <div style="text-align:right">Student Photo Verified</div>
+        </div>
+        <div class="barcode">${s.Barcode_data ? `<img src="${s.Barcode_data}">` : ''}</div>
+        <button class="no-print" onclick="window.print()" style="margin-top:15px">Print / Save PDF</button>
       </div>`;
   }catch(e){
-    box.innerHTML = 'Error: ' + e.message;
+    msg.innerHTML = `<p class="error">${e.message}</p>`;
+  } finally {
+    btn.disabled = false; btn.innerText = 'Get Details';
   }
 }
 </script>
