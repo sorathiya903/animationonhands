@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GSEB SSC Form Details</title>
+<style>
+  body{font-family:Arial; padding:20px; max-width:500px; margin:auto; background:#f5f5f5}
+  input,button{width:100%; padding:12px; margin:8px 0; font-size:16px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box}
+  button{background:#0b5ed7; color:white; border:none; cursor:pointer}
+  .card{background:white; padding:16px; border-radius:10px; margin-top:15px}
+  img{width:120px; border:1px solid #ddd}
+  label{font-size:14px; font-weight:bold}
+</style>
+</head>
+<body>
+  <h2>GSEB SSC Form Details</h2>
+  
+  <label>Application No / Form No</label>
+  <input id="appNo" placeholder="SS/RG/65/0374/04/27/000052" />
+  
+  <label>Date of Birth (DD/MM/YYYY)</label>
+  <input id="dob" placeholder="03/05/2011" />
+  
+  <button onclick="search()">Get Details</button>
+  <div id="result"></div>
+
+<script>
+async function search(){
+  const appNo = document.getElementById('appNo').value.trim();
+  const dob = document.getElementById('dob').value.trim();
+  const box = document.getElementById('result');
+  if(!appNo || !dob){ box.innerHTML = 'Enter Application No and DOB'; return; }
+  box.innerHTML = 'Loading...';
+
+  try{
+    // STEP 1: Get ID from ApplicationNo + DOB
+    const step1Url = `https://registration.gseb.org/api/CheckApplication/CheckApplication?ApplicationNo=${encodeURIComponent(appNo)}&DOB=${encodeURIComponent(dob)}`;
+    const res1 = await fetch(step1Url, { headers: { 'Accept': 'application/json' } });
+    const data1 = await res1.json();
+    
+    const id = data1?.Result?.[0]?.StudentExamFormDetailId;
+    if(!id){ box.innerHTML = 'No record found. Check Application No and DOB.'; return; }
+
+    // STEP 2: Get Full Details using ID
+    const res2 = await fetch(`https://registration.gseb.org/api/CheckApplication/GetStudentDetailsForPrint?Id=${id}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    const data2 = await res2.json();
+    const s = data2?.Result?.StudentDetails?.[0];
+    if(!s){ box.innerHTML = 'Details not found'; return; }
+
+    box.innerHTML = `
+      <div class="card">
+        <img src="${s.ImagePreviewUrl}" />
+        <p><b>Name:</b> ${s.Surname} ${s.StudentName} ${s.GuardianName}</p>
+        <p><b>Form No:</b> ${s.FormNumber}</p>
+        <p><b>Application ID:</b> ${s.StudentPersonalDetailId}</p>
+        <p><b>Category:</b> ${s.CategoryName}</p>
+        <p><b>Gender:</b> ${s.Gender}</p>
+        <p><b>DOB:</b> ${s.DateOfBirth}</p>
+        <p><b>Medium:</b> ${s.Medium}</p>
+        <p><b>School Index:</b> ${s.SchoolIndexNumber}</p>
+        <p><b>District:</b> ${s.DistrictId}</p>
+        <p><b>Taluka:</b> ${s.TalukaId}</p>
+        <p><b>GR No:</b> ${s.GRNumber}</p>
+        <p><b>Total Subjects:</b> ${s.NumberOfTotalSubjectChosen}</p>
+        <p><b>Form Date:</b> ${s.DateOfFillingForm}</p>
+        <p><b>Signature:</b><br><img src="${s.SignaturePreviewUrl}" style="width:150px" /></p>
+        <p><b>Barcode:</b><br><img src="${s.Barcode_data}" style="width:200px" /></p>
+        <button onclick="window.print()">Print</button>
+      </div>`;
+  }catch(e){
+    box.innerHTML = 'Error: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>
